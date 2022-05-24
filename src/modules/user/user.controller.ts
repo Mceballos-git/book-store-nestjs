@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@
 import { User } from './user.entity';
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
+import { UpdateResult } from 'typeorm';
 
 @Controller( 'users' )
 export class UserController {
@@ -27,13 +28,13 @@ export class UserController {
   }
 
   @Put( ':id' )
-  async updateUser( @Param( 'id', ParseIntPipe ) id: number, @Body() user: User ): Promise<void> {
+  async updateUser( @Param( 'id', ParseIntPipe ) id: number, @Body() user: User ): Promise<UserDto> {
     const updatedUser = await this._userService.update( id, user );
     return updatedUser;
   }
 
   @Delete( ':id' )
-  async deleteUser( @Param( 'id', ParseIntPipe ) id: number ): Promise<void> {
+  async deleteUser( @Param( 'id', ParseIntPipe ) id: number ): Promise<UserDto> {
     const deletedUser = await this._userService.delete( id );
     return deletedUser;
   }
