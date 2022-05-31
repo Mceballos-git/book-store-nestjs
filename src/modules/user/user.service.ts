@@ -6,12 +6,16 @@ import { User } from './user.entity';
 import { UserDetails } from './user.details.entity';
 import { getConnection } from 'typeorm';
 import { Role } from '../role/role.entity';
+import { RoleRepository } from '../role/role.repository';
+import { status } from '../../shared/entity-status.enum'
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository( UserRepository )
     private readonly _userRepository: UserRepository,
+    @InjectRepository( RoleRepository )
+    private readonly _roleRepository: RoleRepository
   ) { }
 
 
@@ -21,7 +25,7 @@ export class UserService {
     }
 
     const userExists: User = await this._userRepository.findOne( id, {
-      where: { status: 'ACTIVE' }
+      where: { status: status.ACTIVE }
     } );
 
     if ( !userExists ) {
@@ -37,7 +41,7 @@ export class UserService {
   async getAll(): Promise<User[]> {
 
     const users: User[] = await this._userRepository.find( {
-      where: { status: 'ACTIVE' }
+      where: { status: status.ACTIVE }
     } );
 
     return users;
@@ -65,7 +69,7 @@ export class UserService {
     }
 
     const userExists: User = await this._userRepository.findOne( id, {
-      where: { status: 'ACTIVE' }
+      where: { status: status.ACTIVE }
     } );
 
     if ( !userExists ) {
@@ -85,18 +89,41 @@ export class UserService {
 
   async delete( id: number ): Promise<User> {
     const userExists: User = await this._userRepository.findOne( id, {
-      where: { status: 'ACTIVE' }
+      where: { status: status.ACTIVE }
     } );
 
     if ( !userExists ) {
       throw new NotFoundException();
     }
     try {
-      await this._userRepository.update( id, { status: 'INACTIVE' } );
+      await this._userRepository.update( id, { status: status.INACTIVE } );
       return userExists;
     } catch ( error ) {
       console.log( error );
       throw new InternalServerErrorException();
     }
+  }
+
+  async setRoleToUser( userId: number, roleId: number ) {
+    const userExists: User = await this._userRepository.findOne( userId, {
+      where: { status: status.ACTIVE }
+    } );
+
+    if ( !userExists ) {
+      throw new NotFoundException();
+    }
+
+    const roleExists: Role = await this._roleRepository.findOne( roleId, {
+      where: { status: status.ACTIVE }
+    } );
+
+    if ( !roleExists ) {
+      throw new NotFoundException( 'Role does not exist' );
+    }
+
+    userExists.roles.push( roleExists );
+    await this._userRepository.save( userExists );
+
+    return true
   }
 }
