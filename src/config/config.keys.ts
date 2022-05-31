@@ -3,5 +3,6 @@ export enum Configuration {
     HOST = "localhost",
     USERNAME = "postgres",
     PASSWORD = "mysecretpassword",
-    DATABASE = "bookstore"
+    DATABASE = "bookstore",
+    JWT_SECRET = 'JWT_SECRET'
 }
